@@ -92,14 +92,19 @@ const handleHover = function (e) {
 nav.addEventListener('mouseover', handleHover.bind('0.5'));
 nav.addEventListener('mouseout', handleHover.bind('1'));
 
-// Sticky navigation
-const initialCords = section1.getBoundingClientRect();
+// Sticky navigation: Intersection Observer API
+const header = document.querySelector('.header');
+const navHeight = nav.getBoundingClientRect().height;
+const stickyNav = function (entries) {
+  const [entry] = entries;
 
-console.log(initialCords);
-
-window.addEventListener('scroll', function () {
-  console.log(window.scrollY);
-
-  if (window.scrollY > initialCords.top) nav.classList.add('sticky');
+  if (!entry.isIntersecting) nav.classList.add('sticky');
   else nav.classList.remove('sticky');
+};
+
+const headerObserver = new IntersectionObserver(stickyNav, {
+  root: null,
+  threshold: 0, //when 0% of the header is visible call the callback
+  rootMargin: `-${navHeight}px`,
 });
+headerObserver.observe(header);
