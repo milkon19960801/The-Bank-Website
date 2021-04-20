@@ -6,7 +6,9 @@ const btnCloseModal = document.querySelector('.btn--close-modal');
 const btnsOpenModal = document.querySelectorAll('.btn--show-modal');
 const btnScrollTo = document.querySelector('.btn--scroll-to');
 const section1 = document.querySelector('#section--1');
-
+const tabs = document.querySelectorAll('.operations__tab');
+const tabsContainer = document.querySelector('.operations__tab-container');
+const tabsContent = document.querySelectorAll('.operations__content');
 const nav = document.querySelector('.nav');
 ///////////////////////////////////////
 // Modal window
@@ -51,9 +53,6 @@ document.querySelector('.nav__links').addEventListener('click', function (e) {
 });
 
 // Tabbed component
-const tabs = document.querySelectorAll('.operations__tab');
-const tabsContainer = document.querySelector('.operations__tab-container');
-const tabsContent = document.querySelectorAll('.operations__content');
 
 // Event delegation
 tabsContainer.addEventListener('click', function (e) {
@@ -116,7 +115,7 @@ const revealSection = function (entries, observer) {
 
   if (!entry.isIntersecting) return;
 
-  if (entry.isIntersecting) entry.target.classList.remove('section--hidden');
+  entry.target.classList.remove('section--hidden');
   observer.unobserve(entry.target);
 };
 
@@ -155,30 +154,78 @@ const imgObserver = new IntersectionObserver(loadImg, {
 imgTargets.forEach(img => imgObserver.observe(img));
 
 // Slider component
-const slides = document.querySelectorAll('.slide');
-const btnLeft = document.querySelector('.slider__btn--left');
-const btnRight = document.querySelector('.slider__btn--right');
+const sliders = function () {
+  const slides = document.querySelectorAll('.slide');
+  const btnLeft = document.querySelector('.slider__btn--left');
+  const btnRight = document.querySelector('.slider__btn--right');
+  const dotContainer = document.querySelector('.dots');
 
-let curSlide = 0;
-const maxSlide = slides.length - 1;
+  let curSlide = 0;
+  const maxSlide = slides.length - 1;
 
-const goToSlide = function (slide) {
-  slides.forEach(
-    (s, i) => (s.style.transform = `translateX(${100 * (i - slide)}%)`)
-  );
+  // Functions
+  const createDots = function () {
+    slides.forEach(function (_, i) {
+      dotContainer.insertAdjacentHTML(
+        'beforeend',
+        `<button class="dots__dot" data-slide="${i}"></button>`
+      );
+    });
+  };
+
+  const activateDots = function (slide) {
+    document
+      .querySelectorAll('.dots__dot')
+      .forEach(dot => dot.classList.remove('dots__dot--active'));
+
+    document
+      .querySelector(`.dots__dot[data-slide="${slide}"]`)
+      .classList.add('dots__dot--active');
+  };
+
+  const goToSlide = function (slide) {
+    slides.forEach(
+      (s, i) => (s.style.transform = `translateX(${100 * (i - slide)}%)`)
+    );
+  };
+
+  const nextSlide = function () {
+    if (curSlide === maxSlide) curSlide = 0;
+    else curSlide++;
+    goToSlide(curSlide);
+    activateDots(curSlide);
+  };
+
+  const prevSlide = function () {
+    if (curSlide === 0) curSlide = maxSlide;
+    else curSlide--;
+    goToSlide(curSlide);
+    activateDots(curSlide);
+  };
+
+  const init = function () {
+    createDots();
+    goToSlide(0);
+    activateDots(0);
+  };
+  init();
+
+  //Event Handlers
+  btnRight.addEventListener('click', nextSlide);
+  btnLeft.addEventListener('click', prevSlide);
+
+  // Keyboard
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') prevSlide();
+    if (e.key === 'ArrowRight') nextSlide();
+  });
+
+  dotContainer.addEventListener('click', function (e) {
+    if (e.target.classList.contains('dots__dot')) {
+      const { slide } = e.target.dataset;
+      goToSlide(slide);
+      activateDots(curSlide);
+    }
+  });
 };
-goToSlide(0);
-
-const nextSlide = function () {
-  if (curSlide === maxSlide) curSlide = 0;
-  else curSlide++;
-  goToSlide(curSlide);
-};
-
-const prevSlide = function () {
-  if (curSlide === 0) curSlide = maxSlide;
-  else curSlide--;
-  goToSlide(curSlide);
-};
-btnRight.addEventListener('click', nextSlide);
-btnLeft.addEventListener('click', prevSlide);
+sliders();
